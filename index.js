@@ -14,7 +14,7 @@ module.exports = function (config) {
     db: db,
     users: api(users),
     dats: api(dats),
-    auth: ship, 
+    auth: ship,
     close: function (cb) {
       db.knex.destroy(cb)
     }
