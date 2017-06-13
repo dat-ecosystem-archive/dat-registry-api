@@ -14,10 +14,11 @@ A web registry API including database and REST endpoints. Example hosted at [htt
 
 #### `var api = API(config)`
 
-The API takes required configuration variables. Here's an example config:
+The API takes required configuration variables. Here's an example config. See below in the Configuration section for more details about what configuration variables can be changed.
 
 `config.js`
-```
+
+```js
 {
   data: 'data',
   township: {
@@ -38,9 +39,12 @@ The API takes required configuration variables. Here's an example config:
   archiver: 'archiver'
 }
 ```
+
  
-See below in the Configuration section for more details about what
-configuration variables can be changed.
+#### api.close()
+
+Destroys the underlying database connection.
+
 
 ## Example
 
