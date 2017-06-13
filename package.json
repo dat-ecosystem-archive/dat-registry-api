@@ -1,7 +1,7 @@
 {
   "name": "dat-registry-api",
   "version": "3.0.0",
-  "description": "An online place for dats.",
+  "description": "A web registry API including database and REST endpoints",
   "license": "MIT",
   "repository": {
     "type": "git",
