@@ -24,6 +24,7 @@
     "tape": "^4.6.3"
   },
   "dependencies": {
+    "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "dat-encoding": "^4.0.1",
     "envify": "^4.0.0",
