@@ -27,6 +27,7 @@
     "body-parser": "^1.15.2",
     "dat-encoding": "^4.0.1",
     "envify": "^4.0.0",
+    "is-my-json-valid": "^2.16.0",
     "knex": "^0.12.6",
     "level-party": "^3.0.4",
     "mixpanel": "^0.7.0",
