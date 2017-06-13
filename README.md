@@ -1,8 +1,8 @@
 # Dat Registry
 
-A web registry for the dat network. Hosted at [http://datproject.org](http://datproject.org).
+A web registry for the dat network. Example hosted at [http://datproject.org](http://datproject.org).
 
-[![Build Status](https://travis-ci.org/datproject/datproject.org.svg?branch=master)](https://travis-ci.org/datproject/datproject.org)
+[![Build Status](https://travis-ci.org/datproject/dat-registry-api.svg?branch=master)](https://travis-ci.org/datproject/dat-registry-api)
 
 ## Features
 
