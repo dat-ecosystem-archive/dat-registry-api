@@ -1,4 +1,5 @@
 const createMailer = require('township-email')
+const mockTransport = require('nodemailer-mock-transport')
 const createReset = require('township-reset-password-token')
 const resetPasswordHTML = require('../mailers/resetPassword')
 
@@ -6,6 +7,7 @@ module.exports = function (config, townshipDb) {
   const townshipReset = createReset(townshipDb, {
     secret: config.township.secret
   })
+  if (!config.email.transport) config.email.transport = mockTransport()
   const mailer = createMailer(config.email)
 
   return {

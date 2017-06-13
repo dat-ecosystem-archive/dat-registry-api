@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const database = require('./')
 module.exports = init
 
@@ -58,7 +59,7 @@ if (!module.parent) {
       useNullAsDefault: true
     }
   } else {
-    const defaultConfig = require('../../config')
+    const defaultConfig = require('../config.default')
     dbConfig = defaultConfig.db
   }
   init(dbConfig, function (err) {

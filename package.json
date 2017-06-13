@@ -5,29 +5,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/datproject/datproject.org.git"
+    "url": "https://github.com/datproject/dat-registry-api.git"
   },
   "bugs": {
-    "url": "https://github.com/datproject/datproject.org/issues"
+    "url": "https://github.com/datproject/dat-registry-api/issues"
   },
-  "main": "server/index.js",
-  "bin": "server/cli.js",
-  "browser": {
-    "server/**/**/*": false
-  },
-  "browserify": {
-    "transform": [
-      [
-        "sheetify/transform",
-        {
-          "use": "sheetify-nested"
-        }
-      ]
-    ]
-  },
+  "main": "index.js",
+  "bin": "database/init.js",
   "scripts": {
     "lint": "standard",
-    "database": "node ./server/api/database/init",
     "clean-test": "rm -rf tests/archiver && rm -rf tests/township.db && rm -rf tests/unit/*.sqlite",
     "test": "standard && npm run clean-test && NODE_ENV=test tape tests/*.js | tap-spec"
   },
