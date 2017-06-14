@@ -20,6 +20,8 @@ module.exports = function (config, db) {
   }
 
   return {
+    ship: ship,
+    destroy: ship.destroy,
     currentUser: currentUser,
     register: register,
     login: login,
