@@ -39,7 +39,7 @@ module.exports = function (config, db) {
     ship.verify(req, function (err, decoded, token) {
       if (err) return cb(err)
       if (!decoded) return cb(null)
-      db.models.users.get({email: decoded.auth.basic.email}, function (err, results) {
+      db.users.get({email: decoded.auth.basic.email}, function (err, results) {
         if (err) return cb(err)
         var user = results[0]
         return cb(null, user)
@@ -58,7 +58,7 @@ module.exports = function (config, db) {
           mx.track('registration failed', {distinct_id: req.body.email, body: req.body, reason: err.message})
           return onerror(err, res)
         }
-        db.models.users.create({email: req.body.email, username: req.body.username}, function (err, body) {
+        db.users.create({email: req.body.email, username: req.body.username}, function (err, body) {
           if (err) return onerror(err, res)
           mx.people.set(req.body.email, body)
           body.token = obj.token
@@ -77,7 +77,7 @@ module.exports = function (config, db) {
         mx.track('login failed', {distinct_id: body.email, reason: err.message})
         return onerror(err, res)
       }
-      db.models.users.get({email: body.email}, function (err, results) {
+      db.users.get({email: body.email}, function (err, results) {
         if (err) return onerror(err, res)
         if (!results.length) {
           err = new Error('User does not exist.')

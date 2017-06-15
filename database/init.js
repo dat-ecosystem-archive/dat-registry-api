@@ -15,7 +15,7 @@ function init (dbConfig, cb) {
         table.uuid('id').primary()
         table.string('username').unique()
         table.string('email').unique()
-        table.string('role')
+        table.string('role').defaultTo(0)
         table.text('token')
         table.text('name')
         table.text('description')
