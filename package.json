@@ -14,7 +14,7 @@
   "bin": "database/init.js",
   "scripts": {
     "lint": "standard",
-    "clean-test": "rm -rf tests/archiver && rm -rf tests/township.db && rm -rf tests/unit/*.sqlite",
+    "clean-test": "rm -rf tests/archiver && rm -rf tests/township.db && rm -rf tests/*.sqlite",
     "test": "standard && npm run clean-test && NODE_ENV=test tape tests/*.js | tap-spec"
   },
   "devDependencies": {
