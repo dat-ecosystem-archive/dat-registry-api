@@ -4,8 +4,8 @@ module.exports = Users
  * Interface between API requests and the database. Validation logic for
  * the incoming request goes here. If request is valid, will dispatch to database
  * methods.
- * @param {[type]} auth dat registry Auth instance
- * @param {[type]} db   dat registry Database instance
+ * @param {Object} auth dat registry Auth instance.
+ * @param {Object} db   dat registry Database instance.
  */
 function Users (auth, db) {
   if (!(this instanceof Users)) return new Users(auth, db)
@@ -16,7 +16,7 @@ function Users (auth, db) {
 /**
  * POST request on the Users model.
  * Disabled in favor of the register command on auth.
- * @param  {[type]}   req The incoming request.
+ * @param  {Object}   req The incoming request.
  */
 Users.prototype.post = function (req, cb) {
   return cb(new Error('POST method not allowed'))
@@ -25,7 +25,7 @@ Users.prototype.post = function (req, cb) {
 /**
  * PUT request on the Users model.
  * Update a user's profile data, requires
- * @param  {[type]}   req The incoming request, including the user to update.
+ * @param  {Object}   req The incoming request, including the user to update.
  */
 Users.prototype.put = function (req, cb) {
   if (!req.user) return cb(new Error('Must be logged in to do that.'))
@@ -39,7 +39,7 @@ Users.prototype.put = function (req, cb) {
 
 /**
  * GET request on the Users model.
- * @param  {[type]}   req The incoming request.
+ * @param  {Object}   req The incoming request.
  */
 Users.prototype.get = function (req, cb) {
   if (!req.user) return cb(new Error('Must be logged in to do that.'))
@@ -50,9 +50,9 @@ Users.prototype.get = function (req, cb) {
  * DELETE request.
  * Verify that the user is allowed to be deleted, and then delete the user from both
  * the sql database and authentication databases.
- * @param  {[type]}   req The incoming request.
+ * @param  {Object}   req The incoming request.
  * @param  {Function} cb  The callback.
- * @return {[type]}       The number of rows that were deleted.
+ * @return {Number}       The number of rows that were deleted.
  */
 Users.prototype.delete = function (req, cb) {
   var self = this
@@ -74,9 +74,9 @@ Users.prototype.delete = function (req, cb) {
 
 /**
  * Verify a user's email address.
- * @param  {[type]}   req The incoming request
- * @param  {Function} cb  [description]
- * @return {[type]}       [description]
+ * @param  {Object}   req The incoming request.
+ * @param  {Function} cb  The callback.
+ * @return {Object}       Response message.
  */
 Users.prototype.verifyEmail = function (req, cb) {
   var self = this
