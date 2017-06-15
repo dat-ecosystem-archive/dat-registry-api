@@ -1,4 +1,4 @@
-const createMailer = require('township-email')
+const nodemailer = require('nodemailer')
 const mockTransport = require('nodemailer-mock-transport')
 const createReset = require('township-reset-password-token')
 const resetPasswordHTML = require('../mailers/resetPassword')
@@ -7,8 +7,7 @@ module.exports = function (config, townshipDb) {
   const townshipReset = createReset(townshipDb, {
     secret: config.township.secret
   })
-  if (!config.email.transport) config.email.transport = mockTransport()
-  const mailer = createMailer(config.email)
+  config.email.mailer = nodemailer.createTransport(config.email.smtpConfig || mockTransport())
 
   return {
     mail: mail,
@@ -25,14 +24,14 @@ module.exports = function (config, townshipDb) {
 
       var emailOptions = {
         to: userEmail,
-        from: config.email.fromEmail,
+        from: config.email.fromt,
         subject: 'Reset your password at datproject.org',
         html: resetPasswordHTML({reseturl: reseturl})
       }
 
-      mailer.send(emailOptions, function (err, info) {
+      config.email.mailer.sendMail(emailOptions, function (err, info) {
         if (err) return cb(err)
-        if (config.email.transport.name === 'Mock') {
+        if (config.email.mailer.transporter.name === 'Mock') {
           console.log('mock email sent', emailOptions)
         }
         cb()
