@@ -22,7 +22,7 @@ test('db', function (t) {
 
 test('database should create users', function (t) {
   users.joe.id = 'anewid'
-  db.models.users.create(users.joe, function (err, body) {
+  db.users.create(users.joe, function (err, body) {
     t.ifError(err)
     t.same(body.name, users.joe.name, 'user successfully created')
     t.end()
@@ -30,7 +30,7 @@ test('database should create users', function (t) {
 })
 
 test('database should get users', function (t) {
-  db.models.users.get(function (err, body) {
+  db.users.get(function (err, body) {
     t.ifError(err)
     t.same(body.length, 1, 'only one user')
     t.same(body[0].username, users.joe.username, 'new user is in the list')
@@ -40,7 +40,7 @@ test('database should get users', function (t) {
 
 test('database should create users', function (t) {
   users.bob.id = 'deadbeef'
-  db.models.users.create(users.bob, function (err, body) {
+  db.users.create(users.bob, function (err, body) {
     t.ifError(err)
     t.same(body.username, users.bob.username, 'user successfully created')
     t.end()
@@ -48,7 +48,7 @@ test('database should create users', function (t) {
 })
 
 test('database should get new users', function (t) {
-  db.models.users.get(function (err, body) {
+  db.users.get(function (err, body) {
     t.ifError(err)
     t.same(body.length, 2, 'has two users')
     t.same(body[0].username, users.joe.username, 'joe is in the list')
@@ -58,7 +58,7 @@ test('database should get new users', function (t) {
 })
 
 test('database should get a single user', function (t) {
-  db.models.users.get({id: users.bob.id}, function (err, body) {
+  db.users.get({id: users.bob.id}, function (err, body) {
     t.ifError(err)
     t.same(body.length, 1, 'has one user')
     t.same(body[0].username, users.bob.username, 'bob is in the list')
@@ -68,10 +68,10 @@ test('database should get a single user', function (t) {
 
 test('database should update a single user', function (t) {
   users.bob.username = 'i am not bob actually'
-  db.models.users.update({id: users.bob.id}, {username: users.bob.username}, function (err, body) {
+  db.users.update({id: users.bob.id}, {username: users.bob.username}, function (err, body) {
     t.ifError(err)
     t.same(body, 1, 'updated one item')
-    db.models.users.get({id: users.bob.id}, function (err, body) {
+    db.users.get({id: users.bob.id}, function (err, body) {
       t.ifError(err)
       t.same(body.length, 1, 'get bob')
       t.same(body[0].username, users.bob.username, 'bob has a new name')
@@ -82,12 +82,13 @@ test('database should update a single user', function (t) {
 
 test('cant create two dats with the same name in the same account', function (t) {
   dats.cats.user_id = users.bob.id
-  db.models.dats.create(dats.cats, function (err, body) {
+  db.dats.create(dats.cats, function (err, body) {
     t.ifError(err)
     t.same(body.description, dats.cats.description, 'created the cats')
     t.ok(body.created_at, 'has created_at')
-    db.models.dats.create(dats.cats, function (err, body) {
+    db.dats.create(dats.cats, function (err, body) {
       t.ok(err)
+      console.log(body)
       t.ok(err.message.indexOf('already exists'), 'already exists message')
       t.end()
     })
@@ -96,10 +97,10 @@ test('cant create two dats with the same name in the same account', function (t)
 
 test('database should delete a single user', function (t) {
   users.bob.username = 'i am not bob actually'
-  db.models.users.delete({id: users.bob.id}, function (err, body) {
+  db.users.delete({id: users.bob.id}, function (err, body) {
     t.ifError(err)
     t.same(body, 1, 'deleted one item')
-    db.models.users.get({id: users.bob.id}, function (err, body) {
+    db.users.get({id: users.bob.id}, function (err, body) {
       t.ifError(err)
       t.same(body.length, 0, 'bob doesnt exist')
       t.end()
