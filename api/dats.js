@@ -1,11 +1,22 @@
 module.exports = Dats
 
+/**
+ * Interface between API requests and the database. Validation logic for
+ * the incoming request goes here. If request is valid, will dispatch to database
+ * methods.
+ * @param {[type]} auth dat registry Auth instance
+ * @param {[type]} db   dat registry Database instance
+ */
 function Dats (auth, db) {
   if (!(this instanceof Dats)) return new Dats(auth, db)
   this.db = db
   this.auth = auth
 }
 
+/**
+ * POST request for the Dat model. Used to create new dats. Must be logged in.
+ * @param  {[type]}   req The incoming request.
+ */
 Dats.prototype.post = function (req, cb) {
   var self = this
   if (!req.user && !req.user.id) return cb(new Error('Must be logged in to do that.'))
@@ -22,6 +33,11 @@ Dats.prototype.post = function (req, cb) {
   })
 }
 
+/**
+ * PUT request for the Dat model. Used to update dats. Must be logged in.
+ * Can only update dats that you've created.
+ * @param  {[type]}   req The incoming request.
+ */
 Dats.prototype.put = function (req, cb) {
   var self = this
   if (!req.user) return cb(new Error('Must be logged in to do that.'))
@@ -37,10 +53,18 @@ Dats.prototype.put = function (req, cb) {
   })
 }
 
+/**
+ * GET request for the Dat model.
+ * @param  {[type]}   req The incoming request.
+ */
 Dats.prototype.get = function (req, cb) {
   return this.db.dats.get(req.query, cb)
 }
 
+/**
+ * DELETE request for the Dat model. Can only delete your own dats while logged in.
+ * @param  {[type]}   req The incoming request.
+ */
 Dats.prototype.delete = function (req, cb) {
   var self = this
   if (!req.user) return cb(new Error('Must be logged in to do that.'))

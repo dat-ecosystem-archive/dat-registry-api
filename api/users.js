@@ -16,7 +16,7 @@ function Users (auth, db) {
 /**
  * POST request on the Users model.
  * Disabled in favor of the register command on auth.
- * @param  {[type]}   req The incoming request, including the user to update.
+ * @param  {[type]}   req The incoming request, 
  */
 Users.prototype.post = function (req, cb) {
   return cb(new Error('POST method not allowed'))
