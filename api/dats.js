@@ -58,6 +58,7 @@ Dats.prototype.put = function (req, cb) {
  * @param  {[type]}   req The incoming request.
  */
 Dats.prototype.get = function (req, cb) {
+  if (req.query.search) return this.db.dats.search(req.query.search, cb)
   return this.db.dats.get(req.query, cb)
 }
 

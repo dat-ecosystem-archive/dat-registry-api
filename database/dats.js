@@ -35,6 +35,34 @@ Dats.prototype.get = function (where, cb) {
 }
 
 /**
+ * Search the database for a dat. Can limit search by adding the 'fields'
+ * which is an array of fields to include in the search.
+ * @param  {Object}   where The parameters of the query, takes `limit`, `offset`, `query`, `fields`.
+ * @param  {Function} cb    The callback.
+ */
+Dats.prototype.search = function (where, cb) {
+  var limit = where.limit
+  var offset = where.offset || 0
+  var statement = 'SELECT * FROM dats WHERE '
+  if (!where.fields) where.fields = ['name', 'url', 'description', 'title', 'keywords']
+  if (!Array.isArray(where.fields)) where.fields = where.fields.split(',')
+  if (!where.query) return cb(new Error('query required'))
+  for (var key in where.fields) {
+    var field = where.fields[key]
+    statement += field + " LIKE '%" + where.query + "%'"
+    if (key < where.fields.length - 1) statement += ' OR '
+  }
+  statement += (limit ? ' LIMIT ' + limit : '') +
+    (offset ? ' OFFSET ' + offset || 0 : '') +
+    ';'
+
+  console.log(statement)
+  this.knex.raw(statement).then(function (resp) {
+    return cb(null, resp)
+  }).catch(cb)
+}
+
+/**
  * Delete a dat from the database.
  * @param  {Object}   where A dictionary of params for deletion, id key required.
  * @param  {Function} cb    The callback.
