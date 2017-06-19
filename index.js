@@ -16,7 +16,9 @@ module.exports = function (config) {
     dats: api.dats,
     auth: auth,
     close: function (cb) {
-      db.knex.destroy(cb)
+      db.knex.destroy(function () {
+        archiver.close(cb)
+      })
     }
   }
 }
