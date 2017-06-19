@@ -41,20 +41,11 @@ function init (dbConfig, cb) {
       })
     }
   }).then(function () {
-    // create search tables
-    createSearchTable('datquery', ['name', 'title', 'description', 'url', 'keywords'], function () {
-      createSearchTable('userquery', ['username', 'description', 'name'], function () {
-        cb(null, db)
-      })
-    })
+      cb(null, db)
   }).catch(function (err) {
     cb(err)
   })
 
-  function createSearchTable (name, columns, cb) {
-    console.log('creating', name)
-    db.knex.schema.raw('CREATE VIRTUAL TABLE IF NOT EXISTS ' + name + ' USING FTS3(' + columns.join(', ') + ');').then(cb)
-  }
 }
 
 if (!module.parent) {

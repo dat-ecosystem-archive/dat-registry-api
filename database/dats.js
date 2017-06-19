@@ -43,18 +43,20 @@ Dats.prototype.get = function (where, cb) {
 Dats.prototype.search = function (where, cb) {
   var limit = where.limit
   var offset = where.offset || 0
-  var statement = 'SELECT * FROM dats WHERE '
-  if (!where.fields) where.fields = ['name', 'url', 'description', 'title', 'keywords']
-  if (!Array.isArray(where.fields)) where.fields = where.fields.split(',')
-  if (!where.query) return cb(new Error('query required'))
-  for (var key in where.fields) {
-    var field = where.fields[key]
-    statement += field + " LIKE '%" + where.query + "%'"
-    if (key < where.fields.length - 1) statement += ' OR '
+  var statement = 'SELECT users.username, dats.id, dats.url, dats.name, dats.created_at from dats inner join users on dats.user_id=users.id'
+  if (where.query) {
+    if (!where.fields) where.fields = ['name', 'url', 'description', 'title', 'keywords']
+    if (!Array.isArray(where.fields)) where.fields = where.fields.split(',')
+    statement += ' WHERE '
+    for (var key in where.fields) {
+      var field = where.fields[key]
+      statement += 'dats.' + field + " LIKE '%" + where.query + "%'"
+      if (key < where.fields.length - 1) statement += ' OR '
+    }
+    statement += (limit ? ' LIMIT ' + limit : '') +
+      (offset ? ' OFFSET ' + offset || 0 : '') +
+      ';'
   }
-  statement += (limit ? ' LIMIT ' + limit : '') +
-    (offset ? ' OFFSET ' + offset || 0 : '') +
-    ';'
 
   console.log(statement)
   this.knex.raw(statement).then(function (resp) {
@@ -93,17 +95,4 @@ Dats.prototype.getByShortname = function (params, cb) {
       return cb(null, dat)
     })
   })
-}
-
-/**
- * Gives a list of all dats with the corresponding user names
- * @param  {Function} cb     The callback.
- * @return {Array}          List of dats.
- */
-Dats.prototype.list = function (params, cb) {
-  this.knex.raw('SELECT users.username, dats.id, dats.url, dats.name, dats.created_at from dats inner join users on dats.user_id=users.id')
-  .then(function (resp) {
-    cb(null, resp)
-  })
-  .catch(cb)
 }
