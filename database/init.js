@@ -41,11 +41,10 @@ function init (dbConfig, cb) {
       })
     }
   }).then(function () {
-      cb(null, db)
+    cb(null, db)
   }).catch(function (err) {
     cb(err)
   })
-
 }
 
 if (!module.parent) {
