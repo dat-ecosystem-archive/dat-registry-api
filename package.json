@@ -26,8 +26,13 @@
   "dependencies": {
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
-    "dat-encoding": "^4.0.1",
+    "co-express": "^2.0.0",
+    "dat-encoding": "^4.0.2",
+    "dat-link-resolve": "^1.0.0",
     "envify": "^4.0.0",
+    "hypercore-archiver": "^4.1.0",
+    "hyperdrive": "^9.2.3",
+    "hyperhealth": "^2.0.0",
     "is-my-json-valid": "^2.16.0",
     "knex": "^0.12.6",
     "level-party": "^3.0.4",
@@ -43,11 +48,7 @@
     "township": "^2.0.0",
     "township-reset-password-token": "^1.0.0",
     "uparams": "^1.3.1",
-    "dat-link-resolve": "^1.0.0",
-    "hypercore-archiver": "^4.1.0",
-    "hyperdrive": "^9.2.3",
     "uuid": "^3.0.1",
-    "hyperhealth": "^2.0.0",
     "xtend": "^4.0.1"
   }
 }
