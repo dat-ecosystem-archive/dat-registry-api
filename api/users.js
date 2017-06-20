@@ -1,3 +1,6 @@
+var onerror = require('./onerror')
+var send = require('./send')
+
 module.exports = Users
 
 /**
@@ -13,27 +16,37 @@ function Users (auth, db) {
   this.db = db
 }
 
+Users.prototype._user = function (req, res, cb) {
+  this.auth.currentUser(req, function (err, user) {
+    if (err) return onerror(err, res)
+    return cb(user)
+  })
+}
+
 /**
  * POST request on the Users model.
  * Disabled in favor of the register command on auth.
  * @param  {Object}   req The incoming request.
  */
-Users.prototype.post = function (req, cb) {
-  return cb(new Error('POST method not allowed'))
+Users.prototype.post = function (req, res) {
+  return onerror(new Error('POST method not allowed'))
 }
 
 /**
  * PUT request on the Users model.
- * Update a user's profile data, requires
+ * Update a user's profile data, requires login.
  * @param  {Object}   req The incoming request, including the user to update.
  */
-Users.prototype.put = function (req, cb) {
-  if (!req.user) return cb(new Error('Must be logged in to do that.'))
-  if (!req.body.id) return cb(new Error('id required.'))
-  if (req.user.role !== this.db.users.ROLES.ADMIN && req.user.id !== req.body.id) return cb(new Error('You cannot update other users.'))
-  this.db.users.update({id: req.body.id}, req.body, function (err, data) {
-    if (err) return cb(err)
-    cb(null, {updated: data})
+Users.prototype.put = function (req, res) {
+  var self = this
+  self._user(req, res, function (user) {
+    if (!user) return onerror(new Error('Must be logged in to do that.'))
+    if (!req.body.id) return onerror(new Error('id required.'))
+    if (user.role !== this.db.users.ROLES.ADMIN && user.id !== req.body.id) return onerror(new Error('You cannot update other users.'))
+    self.db.users.update({id: req.body.id}, req.body, function (err, rows) {
+      if (err) return onerror(err, res)
+      send({updated: rows}, res)
+    })
   })
 }
 
@@ -41,9 +54,15 @@ Users.prototype.put = function (req, cb) {
  * GET request on the Users model.
  * @param  {Object}   req The incoming request.
  */
-Users.prototype.get = function (req, cb) {
-  if (!req.user) return cb(new Error('Must be logged in to do that.'))
-  return this.db.users.get(req.query, cb)
+Users.prototype.get = function (req, res) {
+  var self = this
+  self._user(req, res, function (user) {
+    if (!user) return onerror(new Error('Must be logged in to do that.'))
+    return self.db.users.get(req.query, function (err, data) {
+      if (err) return onerror(err, res)
+      send(data, res)
+    })
+  })
 }
 
 /**
@@ -54,19 +73,17 @@ Users.prototype.get = function (req, cb) {
  * @param  {Function} cb  The callback.
  * @return {Number}       The number of rows that were deleted.
  */
-Users.prototype.delete = function (req, cb) {
+Users.prototype.delete = function (req, res) {
   var self = this
-  if (!req.user) return cb(new Error('Must be logged in to do that.'))
-  if (!req.body.id) return cb(new Error('id required. got', req.body))
-  if (req.user.role !== self.db.users.ROLES.ADMIN && req.user.id !== req.body.id) return cb(new Error('You cannot delete other users.'))
-  self.auth.currentUser(req, function (err, user) {
-    if (err) return cb(err)
-    req.user = user
-    self.db.users.delete({id: req.body.id}, function (err, data) {
-      if (err) return cb(err)
-      self.auth.destroy(req, null, req, function (err, status, message) {
-        if (err) return cb(err)
-        return cb(null, {deleted: data})
+  self._user(req, res, function (user) {
+    if (!user) return onerror(new Error('Must be logged in to do that.'))
+    if (!req.body.id) return onerror(new Error('id required. got', req.body))
+    if (user.role !== self.db.users.ROLES.ADMIN && user.id !== req.body.id) return onerror(new Error('You cannot delete other users.'))
+    self.db.users.delete({id: req.body.id}, function (err, rows) {
+      if (err) return onerror(err, res)
+      self.auth.destroy(req, res, req.body, function (err, status, message) {
+        if (err) return onerror(err, res)
+        return send({deleted: rows}, res)
       })
     })
   })
@@ -78,9 +95,14 @@ Users.prototype.delete = function (req, cb) {
  * @param  {Function} cb  The callback.
  * @return {Object}       Response message.
  */
-Users.prototype.verifyEmail = function (req, cb) {
+Users.prototype.verifyEmail = function (req, res) {
   var self = this
-  if (!req.user) return cb(new Error('Must be logged in to do that.'))
-  if (!req.body.id) return cb(new Error('id required'))
-  self.db.users.verifyEmail(req.user, req.body.verify, cb)
+  self._user(req, res, function (user) {
+    if (!user) return onerror(new Error('Must be logged in to do that.'))
+    if (!req.body.id) return onerror(new Error('id required'))
+    self.db.users.verifyEmail(user, req.body.verify, function (err) {
+      if (err) return onerror(err, res)
+      return send({verified: true}, res)
+    })
+  })
 }
