@@ -1,4 +1,5 @@
 const mkdirp = require('mkdirp')
+const encoding = require('dat-encoding')
 const hyperhealth = require('hyperhealth')
 const debug = require('debug')('dat-registry')
 const ram = require('random-access-memory')
@@ -31,23 +32,27 @@ Archiver.prototype.health = function (archive) {
 
 Archiver.prototype.get = function (link, opts, cb) {
   var self = this
+  debug('archiver getting', link)
   if (typeof opts === 'function') return this.get(link, {}, opts)
   resolve(link, function (err, key) {
     if (err) {
       console.trace(err)
       return cb(new Error('Invalid key'))
     }
+    var buf = encoding.toBuf(key)
     debug('got key', key)
-    self.ar.get(key, function (err, metadata, content) {
+    self.ar.get(buf, function (err, metadata, content) {
       if (!err) {
+        debug('found hyperdrive', key)
         var archive = hyperdrive(ram, {metadata, content})
         archive.health = hyperhealth(archive)
         return cb(null, archive, key)
       }
       if (err.message === 'Could not find feed') {
-        self.ar.add(key, function (err) {
+        debug('could not find feed, trying again', key)
+        self.ar.add(buf, function (err) {
           if (err) return cb(err)
-          return self.get(key, opts, cb)
+          return self.get(buf, opts, cb)
         })
       } else return cb(err)
     })
@@ -56,19 +61,15 @@ Archiver.prototype.get = function (link, opts, cb) {
 
 Archiver.prototype.metadata = function (archive, opts, cb) {
   var self = this
+  debug('getting metadata for', archive.key)
   if (typeof opts === 'function') return self.metadata(archive, {}, opts)
-  var dat
-  if (!archive.content) dat = {}
-  else {
-    dat = {
-      peers: archive.content.peers.length,
-      size: archive.content.byteLength
-    }
-  }
+  var dat = {}
   var cancelled = false
 
   var timeout = setTimeout(function () {
+    if (dat.entries) return done(null, dat)
     var msg = 'timed out'
+    debug(msg, dat)
     return done(new Error(msg), dat)
   }, parseInt(opts.timeout))
 
@@ -81,6 +82,7 @@ Archiver.prototype.metadata = function (archive, opts, cb) {
   archive.metadata.update()
   archive.tree.list('/', {nodes: true}, function (err, entries) {
     if (err) {
+      debug('updating metadata')
       return archive.metadata.update(function () {
         if (cancelled) return
         cancelled = true
@@ -89,6 +91,7 @@ Archiver.prototype.metadata = function (archive, opts, cb) {
     }
     if (cancelled) return done(null, dat)
 
+    debug('got', entries.length, 'entries')
     for (var i in entries) {
       var entry = entries[i]
       entries[i] = entry.value
@@ -106,7 +109,6 @@ Archiver.prototype.metadata = function (archive, opts, cb) {
         } catch (e) {
           err = new Error('dat.json file malformed')
         }
-        dat.peers = archive.content ? archive.content.peers.length : 0
         dat.size = archive.content.byteLength
         return done(err, dat)
       })

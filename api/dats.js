@@ -32,11 +32,11 @@ Dats.prototype._user = function (req, res, cb) {
  */
 Dats.prototype.post = function (req, res) {
   var self = this
-  if (!req.body.name) return onerror(new Error('Name required.'))
-  if (!req.body.url) return onerror(new Error('URL required.'))
+  if (!req.body.name) return onerror(new Error('Name required.'), res)
+  if (!req.body.url) return onerror(new Error('URL required.'), res)
   // creating a new dat. let's see if this url even makes any sense
   self._user(req, res, function (user) {
-    if (!user && !user.id) return onerror(new Error('Must be logged in to do that.'))
+    if (!user && !user.id) return onerror(new Error('Must be logged in to do that.'), res)
     req.body.user_id = user.id
     self.archiver.get(req.body.url, function (err, archive, key) {
       if (err) return onerror(err, res)
@@ -71,12 +71,12 @@ Dats.prototype.post = function (req, res) {
 Dats.prototype.put = function (req, res) {
   var self = this
   self._user(req, res, function (user) {
-    if (!user) return onerror(new Error('Must be logged in to do that.'))
-    if (!req.body.id) return onerror(new Error('id required'))
+    if (!user) return onerror(new Error('Must be logged in to do that.'), res)
+    if (!req.body.id) return onerror(new Error('id required'), res)
     self.db.dats.get({id: req.body.id}, function (err, results) {
       if (err) return onerror(err, res)
-      if (!results.length) return onerror(new Error('Dat does not exist.'))
-      if (results[0].user_id !== user.id) return onerror(new Error('Cannot update someone elses dat.'))
+      if (!results.length) return onerror(new Error('Dat does not exist.'), res)
+      if (results[0].user_id !== user.id) return onerror(new Error('Cannot update someone elses dat.'), res)
       self.db.dats.update({id: req.body.id}, req.body, function (err, data) {
         if (err) return onerror(err, res)
         send({updated: data}, res)
@@ -89,7 +89,11 @@ Dats.prototype.put = function (req, res) {
  * GET request for the Dat model. Don't need to be logged in.
  * @param  {Object}   req The incoming request.
  */
-Dats.prototype.get = function (req, cb) {
+Dats.prototype.get = function (req, res) {
+  var cb = function (err, data) {
+    if (err) return onerror(err)
+    return send(data, res)
+  }
   if (req.query.search) return this.db.dats.search(req.query.search, cb)
   return this.db.dats.get(req.query, cb)
 }
@@ -101,11 +105,11 @@ Dats.prototype.get = function (req, cb) {
 Dats.prototype.delete = function (req, res) {
   var self = this
   self._user(req, res, function (user) {
-    if (!user) return onerror(new Error('Must be logged in to do that.'))
+    if (!user) return onerror(new Error('Must be logged in to do that.'), res)
     self.db.dats.get({name: req.body.name, user_id: user.id}, function (err, results) {
       if (err) return onerror(err, res)
-      if (!results.length) return onerror(new Error('Dat does not exist.'))
-      if (results[0].user_id !== user.id) return onerror(new Error('Cannot delete someone elses dat.'))
+      if (!results.length) return onerror(new Error('Dat does not exist.'), res)
+      if (results[0].user_id !== user.id) return onerror(new Error('Cannot delete someone elses dat.'), res)
       self.db.dats.delete({id: results[0].id}, function (err, data) {
         if (err) return onerror(err, res)
         send({deleted: data}, res)

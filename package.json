@@ -27,7 +27,7 @@
     "async": "^2.1.4",
     "body-parser": "^1.15.2",
     "co-express": "^2.0.0",
-    "dat-encoding": "^4.0.1",
+    "dat-encoding": "^4.0.2",
     "dat-link-resolve": "^1.0.0",
     "envify": "^4.0.0",
     "hypercore-archiver": "^4.1.0",
