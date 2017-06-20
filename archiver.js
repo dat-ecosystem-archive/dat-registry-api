@@ -14,7 +14,7 @@ function Archiver (dir) {
   if (!(this instanceof Archiver)) return new Archiver(dir)
   mkdirp.sync(dir)
   this.ar = archiver(dir, {sparse: true})
-  this.swarm = swarm(this.ar)
+  this.swarm = swarm(this.ar, {udp: false})
 }
 
 Archiver.prototype.health = function (archive) {
