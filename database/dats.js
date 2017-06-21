@@ -1,4 +1,5 @@
-var models = require('./models')
+const debug = require('debug')('dat-registry')
+const models = require('./models')
 
 module.exports = Dats
 
@@ -6,6 +7,7 @@ function Dats (knex) {
   if (!(this instanceof Dats)) return new Dats(knex)
   this.knex = knex
   this.models = models(knex)
+  this.keys = ['name', 'user_id', 'url', 'name', 'description']
 }
 
 /**
@@ -15,7 +17,19 @@ function Dats (knex) {
  * @return {Object}          The dat as it appears in the database.
  */
 Dats.prototype.create = function (values, cb) {
-  this.models.dats.create(values, cb)
+  this.models.dats.create(this._validate(values), cb)
+}
+
+Dats.prototype._validate = function (values) {
+  var body = {}
+
+  for (var i in this.keys) {
+    var key = this.keys[i]
+    body[key] = values[key]
+  }
+
+  if (Array.isArray(values['keywords'])) body['keywords'] = values['keywords'].join(' ')
+  return body
 }
 
 /**
@@ -27,7 +41,7 @@ Dats.prototype.create = function (values, cb) {
  */
 Dats.prototype.update = function (where, values, cb) {
   if (!where.id) return cb(new Error('id required'))
-  this.models.dats.update({id: where.id}, values, cb)
+  this.models.dats.update({id: where.id}, this._validate(values), cb)
 }
 
 Dats.prototype.get = function (where, cb) {
@@ -58,7 +72,7 @@ Dats.prototype.search = function (where, cb) {
       ';'
   }
 
-  console.log(statement)
+  debug(statement)
   this.knex.raw(statement).then(function (resp) {
     return cb(null, resp)
   }).catch(cb)

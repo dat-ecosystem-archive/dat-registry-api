@@ -108,6 +108,21 @@ test('database should delete a single user', function (t) {
   })
 })
 
+test('database should filter extra dat values', function (t) {
+  dats.penguins.author = 'this is not a proper field'
+  dats.penguins.keywords = ['fluffy', 'cute', 'swimmers']
+  db.dats.create(dats.penguins, function (err, body) {
+    t.ifError(err)
+    db.dats.get({id: body.id}, function (err, results) {
+      t.ifError(err)
+      var body = results[0]
+      t.equal(body.author, undefined, 'author doesnt exist')
+      t.equal(body.keywords, 'fluffy cute swimmers', 'keywords are translated to text')
+      t.end()
+    })
+  })
+})
+
 test('teardown', function (t) {
   helpers.tearDown(config, function () {
     db.knex.destroy(function () {
