@@ -91,7 +91,7 @@ Dats.prototype.put = function (req, res) {
  */
 Dats.prototype.get = function (req, res) {
   var cb = function (err, data) {
-    if (err) return onerror(err)
+    if (err) return onerror(err, res)
     return send(data, res)
   }
   if (req.query.search) return this.db.dats.search(req.query.search, cb)
