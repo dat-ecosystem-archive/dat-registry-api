@@ -29,6 +29,7 @@
     "co-express": "^2.0.0",
     "dat-encoding": "^4.0.2",
     "dat-link-resolve": "^1.0.0",
+    "debug": "^2.6.8",
     "envify": "^4.0.0",
     "hypercore-archiver": "^4.1.0",
     "hyperdrive": "^9.2.3",
