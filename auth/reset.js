@@ -8,6 +8,7 @@ module.exports = function (config, townshipDb) {
   const townshipReset = createReset(townshipDb, {
     secret: config.township.secret
   })
+  debug('setup mailer', config.email.smtpConfig)
   config.email.mailer = nodemailer.createTransport(config.email.smtpConfig || mockTransport())
 
   return {
@@ -32,6 +33,7 @@ module.exports = function (config, townshipDb) {
 
       debug('sending mail', emailOptions)
       config.email.mailer.sendMail(emailOptions, function (err, info) {
+        debug('got', err, info)
         if (err) return cb(err)
         if (config.email.mailer.transporter.name === 'Mock') {
           console.log('mock email sent', emailOptions)
