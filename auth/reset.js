@@ -5,9 +5,7 @@ const createReset = require('township-reset-password-token')
 const resetPasswordHTML = require('../mailers/resetPassword')
 
 module.exports = function (config, townshipDb) {
-  const townshipReset = createReset(townshipDb, {
-    secret: config.township.secret
-  })
+  const townshipReset = createReset(townshipDb, config.township)
   debug('setup mailer', config.email.smtpConfig)
   config.email.mailer = nodemailer.createTransport(config.email.smtpConfig || mockTransport())
 
