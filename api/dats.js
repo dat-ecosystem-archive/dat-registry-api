@@ -40,7 +40,7 @@ Dats.prototype.post = function (req, res) {
     req.body.user_id = user.id
     self.archiver.get(req.body.url, function (err, archive, key) {
       if (err) return onerror(err, res)
-      var timeout = req.body.timeout || 5000
+      var timeout = req.body.timeout || 10000
       self.archiver.metadata(archive, {timeout}, function (err, info) {
         if (err) return onerror(err, res)
         self.db.dats.get({name: req.body.name, user_id: user.id}, function (err, data) {
