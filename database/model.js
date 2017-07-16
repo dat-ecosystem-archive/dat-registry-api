@@ -1,6 +1,6 @@
 const async = require('async')
 const uuid = require('uuid')
-const errors = require('../errors')
+const errors = require('../lib/errors')
 const validators = require('./validate')
 
 module.exports = function (knex, model, opts) {

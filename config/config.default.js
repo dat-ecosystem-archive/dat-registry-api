@@ -1,14 +1,13 @@
 module.exports = {
-  data: '.',
-  admins: [
-    'admin'
-  ],
+  data: 'data',
+  admins: ['admins'],
   township: {
     secret: 'very very not secret',
     db: 'township.db'
   },
   email: {
-    fromEmail: 'hi@example.com'
+    from: 'hi@example.com',
+    smtpConfig: undefined
   },
   db: {
     dialect: 'sqlite3',

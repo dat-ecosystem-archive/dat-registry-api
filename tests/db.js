@@ -1,5 +1,4 @@
 const test = require('tape')
-const path = require('path')
 // XXX: somehow cloning the config is necessary for tape to work
 const config = JSON.parse(JSON.stringify(require('./config')))
 const helpers = require('./helpers')
@@ -9,11 +8,10 @@ var users = JSON.parse(JSON.stringify(helpers.users))
 var dats = JSON.parse(JSON.stringify(helpers.dats))
 delete users.joe.password
 delete users.bob.password
+delete users.admin.password
 
 test('db', function (t) {
-  const dbConfig = Object.assign({}, config.db)
-  dbConfig.connection.filename = path.join(__dirname, 'test-db.sqlite')
-  initDb(dbConfig, function (err, adb) {
+  initDb(config, function (err, adb) {
     if (err) throw err
     db = adb
     t.end()
@@ -62,6 +60,8 @@ test('database should get a single user', function (t) {
     t.ifError(err)
     t.same(body.length, 1, 'has one user')
     t.same(body[0].username, users.bob.username, 'bob is in the list')
+    t.same(body[0].role, db.users.ROLES.UNVERIFIED, 'bob starts unverified')
+    t.same(body[0].admin, false, '.admin property exists')
     t.end()
   })
 })
@@ -88,7 +88,6 @@ test('cant create two dats with the same name in the same account', function (t)
     t.ok(body.created_at, 'has created_at')
     db.dats.create(dats.cats, function (err, body) {
       t.ok(err)
-      console.log(body)
       t.ok(err.message.indexOf('already exists'), 'already exists message')
       t.end()
     })
@@ -118,6 +117,19 @@ test('database should filter extra dat values', function (t) {
       var body = results[0]
       t.equal(body.author, undefined, 'author doesnt exist')
       t.equal(body.keywords, 'fluffy cute swimmers', 'keywords are translated to text')
+      t.end()
+    })
+  })
+})
+
+test('adds admins', (t) => {
+  db.users.create(users.admin, function (err, body) {
+    t.ifError(err)
+    db.users.get({username: 'admin'}, (err, users) => {
+      t.ifError(err)
+      t.same(users.length, 1, 'one user named admin')
+      t.same(users[0].role, db.users.ROLES.ADMIN, 'is an admin')
+      t.same(users[0].admin, true, '.admin property exists')
       t.end()
     })
   })

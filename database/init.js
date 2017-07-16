@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 const database = require('./')
+const admins = require('./admins')
+const Config = require('../config')
 module.exports = init
 
 /**
  * Initializes the database.
- * @param  {[type]}   dbConfig  An opts object from config.db
+ * @param  {[type]}   cfg       A config object
  * @param  {Function} cb        When done, calls cb with (err, db)
  */
-function init (dbConfig, cb) {
-  var db = database(dbConfig)
+function init (cfg, cb) {
+  var config = Config(cfg)
+  console.log('Creating tables for', config.db)
+  var db = database(config)
   db.knex.schema.hasTable('users').then(function (exists) {
     if (!exists) {
       return db.knex.schema.createTable('users', function (table) {
@@ -41,28 +45,22 @@ function init (dbConfig, cb) {
       })
     }
   }).then(function () {
-    cb(null, db)
+    if (!config.admins) {
+      console.warn('Warning: Skipping admin setup, no admins specified in config.admins')
+      return cb(null, db)
+    }
+    admins(db, config.admins, function (err) {
+      if (err) throw err
+      cb(null, db)
+    })
   }).catch(function (err) {
     cb(err)
   })
 }
 
 if (!module.parent) {
-  var dbPath = process.argv.slice(2)[0]
-  var dbConfig = {}
-  if (dbPath) {
-    dbConfig = {
-      dialect: 'sqlite3',
-      connection: {
-        filename: dbPath
-      },
-      useNullAsDefault: true
-    }
-  } else {
-    const defaultConfig = require('../config.default')
-    dbConfig = defaultConfig.db
-  }
-  init(dbConfig, function (err) {
+  var config = require(process.argv.slice(2)[0] || '../config.default')
+  init(config, function (err) {
     if (err) throw err
     console.log('Successfully created tables.')
     process.exit(0)
