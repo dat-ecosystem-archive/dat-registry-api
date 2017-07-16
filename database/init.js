@@ -42,6 +42,10 @@ function init (config, cb) {
       })
     }
   }).then(function () {
+    if (!config.admins) {
+      console.warn('Warning: Skipping admin setup, no admins specified in config.admins')
+      return cb(null, db)
+    }
     admins(db, config.admins, function (err) {
       if (err) throw err
       cb(null, db)
@@ -52,9 +56,8 @@ function init (config, cb) {
 }
 
 if (!module.parent) {
-  var config = require('../config.default')
-  var dbPath = process.argv.slice(2)[0]
-  if (dbPath) config.connection.filename = dbPath
+  var configPath = process.argv.slice(2)[0] || '../config.default'
+  var config = require(configPath)
   init(config, function (err) {
     if (err) throw err
     console.log('Successfully created tables.')

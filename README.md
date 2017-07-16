@@ -10,7 +10,16 @@ A web registry API including database and REST endpoints. Example hosted at [htt
 * Create short links for dats with user accounts.
 * Search dats and users.
 
-## Usage
+## CLI Usage
+
+Install `dat-registry-api` using npm and initialize the database:
+
+```
+npm install dat-registry-api --save
+dat-registry-api <config>
+```
+
+## JS Usage
 
 #### `var api = API(config)`
 
