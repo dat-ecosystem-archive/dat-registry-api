@@ -1,8 +1,5 @@
 module.exports = {
   data: 'data',
-  admins: [
-    'admin'
-  ],
   township: {
     secret: 'very very not secret',
     db: 'township.db'

@@ -6,7 +6,7 @@ const database = require('./database')
 const Archiver = require('./archiver')
 
 module.exports = function (config) {
-  var db = config.database || database(config.db)
+  var db = config.database || database(config)
   const archiver = config.dats || Archiver(config.archiver)
   const auth = new Auth(config, db)
   var users = Users(auth, db)

@@ -3,8 +3,8 @@ const models = require('./models')
 
 module.exports = Dats
 
-function Dats (knex) {
-  if (!(this instanceof Dats)) return new Dats(knex)
+function Dats (knex, config) {
+  if (!(this instanceof Dats)) return new Dats(knex, config)
   this.knex = knex
   this.models = models(knex)
   this.keys = ['name', 'user_id', 'url', 'name', 'description']
