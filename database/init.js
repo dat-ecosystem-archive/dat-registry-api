@@ -59,7 +59,7 @@ function init (cfg, cb) {
 }
 
 if (!module.parent) {
-  var config = require(process.argv.slice(2)[0] || '../config.default')
+  var config = require(process.argv.slice(2)[0] || '../config/config.default')
   init(config, function (err) {
     if (err) throw err
     console.log('Successfully created tables.')
