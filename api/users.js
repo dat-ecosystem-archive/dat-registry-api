@@ -1,4 +1,5 @@
 var onerror = require('./onerror')
+var debug = require('debug')('dat-registry')
 var send = require('./send')
 
 module.exports = Users
@@ -17,8 +18,10 @@ function Users (auth, db) {
 }
 
 Users.prototype._user = function (req, res, cb) {
+  var self = this
   this.auth.currentUser(req, function (err, user) {
     if (err) return onerror(err, res)
+    if (user) user.admin = (user.role === self.db.users.ROLES.ADMIN)
     return cb(user)
   })
 }
@@ -42,7 +45,7 @@ Users.prototype.put = function (req, res) {
   self._user(req, res, function (user) {
     if (!user) return onerror(new Error('Must be logged in to do that.'), res)
     if (!req.body.id) return onerror(new Error('id required.'), res)
-    if (user.role !== self.db.users.ROLES.ADMIN && user.id !== req.body.id) return onerror(new Error('You cannot update other users.'), res)
+    if (!user.admin && user.id !== req.body.id) return onerror(new Error('You cannot update other users.'), res)
     self.db.users.update({id: req.body.id}, req.body, function (err, rows) {
       if (err) return onerror(err, res)
       send({updated: rows}, res)
@@ -66,6 +69,26 @@ Users.prototype.get = function (req, res) {
 }
 
 /**
+ * Suspend user.
+ * Verify that the user is allowed to be suspended, and then mark the user as done for
+ * @param  {Object}   req The incoming request.
+ * @param  {Function} cb  The callback.
+ * @return {Number}       The number of rows that were deleted.
+ */
+Users.prototype.suspend = function (req, res) {
+  var self = this
+  self._user(req, res, function (user) {
+    if (!user) return onerror(new Error('Must be logged in to do that.'), res)
+    if (!req.body.id) return onerror(new Error('id required. got', req.body), res)
+    if (!user.admin) return onerror(new Error('You must be an admin to do that.'), res)
+    self.db.users.update({id: req.body.id}, {role: self.db.users.ROLES.SUSPENDED}, function (err, rows) {
+      if (err) return onerror(err, res)
+      return send({suspended: rows}, res)
+    })
+  })
+}
+
+/**
  * DELETE request.
  * Verify that the user is allowed to be deleted, and then delete the user from both
  * the sql database and authentication databases.
@@ -78,7 +101,8 @@ Users.prototype.delete = function (req, res) {
   self._user(req, res, function (user) {
     if (!user) return onerror(new Error('Must be logged in to do that.'), res)
     if (!req.body.id) return onerror(new Error('id required. got', req.body), res)
-    if (user.role !== self.db.users.ROLES.ADMIN && user.id !== req.body.id) return onerror(new Error('You cannot delete other users.'), res)
+    if (!user.admin && user.id !== req.body.id) return onerror(new Error('You cannot delete other users.'), res)
+    debug('deleting user', req.body, 'i am', user.id)
     self.db.users.delete({id: req.body.id}, function (err, rows) {
       if (err) return onerror(err, res)
       self.auth.destroy(req, res, req.body, function (err, status, message) {

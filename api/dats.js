@@ -34,33 +34,42 @@ Dats.prototype.post = function (req, res) {
   var self = this
   if (!req.body.name) return onerror(new Error('Name required.'), res)
   if (!req.body.url) return onerror(new Error('URL required.'), res)
-  // creating a new dat. let's see if this url even makes any sense
+  // creating a new dat.
   self._user(req, res, function (user) {
     if (!user && !user.id) return onerror(new Error('Must be logged in to do that.'), res)
-    req.body.user_id = user.id
+
+    // So admins can create dats for other users, otherwise defaults to current user id.
+    if (!user.admin || !req.body.user_id) req.body.user_id = user.id
+
+    if (!self.archiver.opts.verifyConnection) return addDat(req, user)
+    // let's only add dats if the url is up
     self.archiver.get(req.body.url, function (err, archive, key) {
       if (err) return onerror(err, res)
       var timeout = req.body.timeout || 10000
       self.archiver.metadata(archive, {timeout}, function (err, info) {
         if (err) return onerror(err, res)
-        self.db.dats.get({name: req.body.name, user_id: user.id}, function (err, data) {
-          if (err) return onerror(err, res)
-          if (data.length > 0) {
-            // dat exists. updating
-            self.db.dats.update({id: data[0].id}, req.body, function (err, data) {
-              if (err) return onerror(err, res)
-              send({updated: data}, res)
-            })
-          } else {
-            self.db.dats.create(req.body, function (err, data) {
-              if (err) return onerror(err, res)
-              send(data, res, 201)
-            })
-          }
-        })
+        addDat(req, user)
       })
     })
   })
+
+  function addDat (req, user) {
+    self.db.dats.get({name: req.body.name, user_id: user.id}, function (err, data) {
+      if (err) return onerror(err, res)
+      if (data.length > 0) {
+        // dat exists. updating
+        self.db.dats.update({id: data[0].id}, req.body, function (err, data) {
+          if (err) return onerror(err, res)
+          send({updated: data}, res)
+        })
+      } else {
+        self.db.dats.create(req.body, function (err, data) {
+          if (err) return onerror(err, res)
+          send(data, res, 201)
+        })
+      }
+    })
+  }
 }
 
 /**
@@ -76,7 +85,7 @@ Dats.prototype.put = function (req, res) {
     self.db.dats.get({id: req.body.id}, function (err, results) {
       if (err) return onerror(err, res)
       if (!results.length) return onerror(new Error('Dat does not exist.'), res)
-      if (results[0].user_id !== user.id) return onerror(new Error('Cannot update someone elses dat.'), res)
+      if (!user.admin && results[0].user_id !== user.id) return onerror(new Error('Cannot update someone elses dat.'), res)
       self.db.dats.update({id: req.body.id}, req.body, function (err, data) {
         if (err) return onerror(err, res)
         send({updated: data}, res)
@@ -106,10 +115,10 @@ Dats.prototype.delete = function (req, res) {
   var self = this
   self._user(req, res, function (user) {
     if (!user) return onerror(new Error('Must be logged in to do that.'), res)
-    self.db.dats.get({name: req.body.name, user_id: user.id}, function (err, results) {
+    self.db.dats.get(req.body, function (err, results) {
       if (err) return onerror(err, res)
       if (!results.length) return onerror(new Error('Dat does not exist.'), res)
-      if (results[0].user_id !== user.id) return onerror(new Error('Cannot delete someone elses dat.'), res)
+      if (!user.admin && results[0].user_id !== user.id) return onerror(new Error('Cannot delete someone elses dat.'), res)
       self.db.dats.delete({id: results[0].id}, function (err, data) {
         if (err) return onerror(err, res)
         send({deleted: data}, res)

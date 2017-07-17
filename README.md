@@ -10,7 +10,18 @@ A web registry API including database and REST endpoints. Example hosted at [htt
 * Create short links for dats with user accounts.
 * Search dats and users.
 
-## Usage
+## CLI Usage
+
+Install `dat-registry-api` using npm and initialize the database:
+
+```
+npm install dat-registry-api --save
+dat-registry-api <config>
+```
+
+See a default configuration file in `config/config.default.js`.
+
+## JS Usage
 
 #### `var api = API(config)`
 
@@ -21,6 +32,9 @@ The API takes required configuration variables. Here's an example config. See be
 ```js
 {
   data: 'data',
+  admins: [
+    'admin', 'pam', 'willywonka'
+  ]
   township: {
     secret: 'very very not secret',
     db: 'township.db'
@@ -36,11 +50,15 @@ The API takes required configuration variables. Here's an example config. See be
     useNullAsDefault: true
   },
   whitelist: false,
-  archiver: 'archiver'
+  archiver: {
+    dir: 'archiver',
+    verifyConnection: false,
+    timeout: 3000
+  }
 }
 ```
 
- 
+
 #### api.close()
 
 Destroys the underlying database connection.
@@ -59,6 +77,7 @@ var router = express()
 router.post('/users', api.users.post)
 router.get('/users', api.users.get)
 router.put('/users', api.users.put)
+router.put('/users/suspend', api.users.suspend)
 router.delete('/users', api.users.delete)
 
 router.get('/dats', api.dats.get)
@@ -71,17 +90,30 @@ router.post('/login', api.auth.login)
 router.post('/password-reset', api.auth.passwordReset)
 router.post('/password-reset-confirm', api.auth.passwordResetConfirm)
 
-// etc...
-
 ```
 
-## Configuration 
+## Configuration
+
+### Admins
+
+Admins can add, modify, and delete dats that they do not own. Admins can also delete and modify other users. You can specify a list of admin users by their usernames in the configuration.
+
+```js
+{
+  "admins": ["admin", "pam", "willywonka"]
+}
+```
+
 
 ### Secret key
 
 Each deployment should have a different secret key. You want to set the secret key for generating password hashes and salts.
 
-Set the secret key by using { township: '<SECRET_KEY>' } 
+```js
+{
+   township: '<SECRET_KEY>'
+}
+```
 
 ### Default location of account and sqlite databases
 
@@ -98,7 +130,9 @@ Specify where you want data for the app (databases and also by default the archi
 To create a closed beta, add the `whitelist` key with the path to a newline-delimited list of emails allowed to sign up. Default value `false` allows anyone to register an account.
 
 ```
-{ whitelist: '/path/to/my/list/of/folks.txt'}
+{
+  whitelist: '/path/to/my/list/of/folks.txt'
+}
 ```
 
 `folks.txt` should have a list of valid emails, each separated by a new line character. For example:
@@ -113,7 +147,9 @@ robert.singletown@sbcglobal.netw
 You can set the location where dat data is cached on the filesystem. By default it is stored in the `data` directory (above), in the `archiver` subdirectory. You can change this by using the `archiver` key:
 
 ```
-{ archiver: '/mnt1/bigdisk/archiver-data' }
+{
+  archiver: '/mnt1/bigdisk/archiver-data'
+}
 ```
 
 ### Mixpanel account
@@ -123,7 +159,9 @@ The site will report basic information to Mixpanel if you have an account. It wi
 This can also be set in the configuration file by using the `mixpanel` key:
 
 ```
-{ mixpanel: '<my-api-key-here>' }
+{
+  mixpanel: '<my-api-key-here>'
+}
 ```
 
 ### Advanced password security

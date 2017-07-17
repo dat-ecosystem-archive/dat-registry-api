@@ -3,14 +3,14 @@ const path = require('path')
 const response = require('response')
 const level = require('level-party')
 const verify = require('./verify')
-const errors = require('../errors')
+const errors = require('../lib/errors')
 const Mixpanel = require('mixpanel')
 const createReset = require('./reset')
 
 module.exports = function (config, db) {
   const townshipDb = level(config.township.db || path.join(__dirname, 'township.db'))
   const ship = township(townshipDb, config.township)
-  const mx = Mixpanel.init(config.mixpanel)
+  const mx = Mixpanel.init(config.mixpanel || 'mixpanel disabled')
   var reset
   if (config.email) reset = createReset(config, townshipDb)
 
@@ -85,6 +85,9 @@ module.exports = function (config, db) {
           return onerror(err, res)
         }
         var user = results[0]
+        if (user.role === db.users.ROLES.SUSPENDED) {
+          return onerror(new Error('Your account has been suspended for unauthorized activity. If you think this is an error, please open an issue on GitHub.'), res)
+        }
         obj.email = user.email
         obj.username = user.username
         obj.role = user.role

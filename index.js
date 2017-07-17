@@ -1,14 +1,16 @@
-const Dats = require('./api/dats')
 const wrap = require('co-express')
+const Dats = require('./api/dats')
 const Users = require('./api/users')
 const Auth = require('./auth')
 const database = require('./database')
-const Archiver = require('./archiver')
+const Archiver = require('./lib/archiver')
+const Config = require('./config')
 
-module.exports = function (config) {
-  var db = config.database || database(config.db)
+module.exports = function (input) {
+  var config = Config(input)
+  var db = config.database || database(config)
   const archiver = config.dats || Archiver(config.archiver)
-  const auth = new Auth(config, db)
+  const auth = Auth(config, db)
   var users = Users(auth, db)
   var dats = Dats(auth, db, archiver)
 
@@ -16,6 +18,7 @@ module.exports = function (config) {
   wrapAll(dats)
 
   return {
+    config: config,
     db: db,
     auth: auth,
     archiver: archiver,
