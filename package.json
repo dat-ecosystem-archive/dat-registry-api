@@ -1,6 +1,6 @@
 {
   "name": "dat-registry-api",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "A web registry API including database and REST endpoints.",
   "license": "MIT",
   "repository": {
