@@ -2,6 +2,7 @@ const mkdirp = require('mkdirp')
 const encoding = require('dat-encoding')
 const hyperhealth = require('hyperhealth')
 const debug = require('debug')('dat-registry')
+const ram = require('random-access-memory')
 const resolve = require('dat-link-resolve')
 const hyperdrive = require('hyperdrive')
 const archiver = require('hypercore-archiver')
@@ -43,7 +44,7 @@ Archiver.prototype.get = function (link, opts, cb) {
     self.ar.get(buf, function (err, metadata, content) {
       if (!err) {
         debug('found hyperdrive', key)
-        var archive = hyperdrive(null, {metadata, content})
+        var archive = hyperdrive(ram, {metadata, content})
         archive.health = hyperhealth(archive)
         return cb(null, archive, key)
       }
