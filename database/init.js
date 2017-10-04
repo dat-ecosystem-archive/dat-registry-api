@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const path = require('path')
 const database = require('./')
 module.exports = init
 
@@ -59,7 +60,7 @@ if (!module.parent) {
       useNullAsDefault: true
     }
   } else {
-    const defaultConfig = require('../config.default')
+    const defaultConfig = require(path.join(process.cwd(), '/config/default'))
     dbConfig = defaultConfig.db
   }
   init(dbConfig, function (err) {
