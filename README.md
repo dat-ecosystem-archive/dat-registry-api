@@ -1,6 +1,6 @@
 # Dat Registry API
 
-A web registry API including database and REST endpoints. Example hosted at [http://datproject.org](http://datproject.org).
+A web registry API including database and REST endpoints. Example hosted at [http://datbase.org](http://datbase.org).
 
 [![Build Status](https://travis-ci.org/datproject/dat-registry-api.svg?branch=master)](https://travis-ci.org/datproject/dat-registry-api)
 

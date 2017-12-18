@@ -18,14 +18,14 @@ module.exports = function (config, townshipDb) {
     townshipReset.create({ accountKey: accountKey }, function (err, token) {
       if (err) return cb(new Error('problem creating reset token'))
       const clientHost = process.env.VIRTUAL_HOST
-      ? `https://${process.env.VIRTUAL_HOST}`
+      ? `https://${process.env.VIRTUAL_HOST.split(',')[0]}` // can be comma separated hosts
       : 'http://localhost:8080'
       var reseturl = `${clientHost}/reset-password?accountKey=${accountKey}&resetToken=${token}&email=${userEmail}`
 
       var emailOptions = {
         to: userEmail,
         from: config.email.from,
-        subject: 'Reset your password at datproject.org',
+        subject: 'Reset your password at datbase.org',
         html: resetPasswordHTML({reseturl: reseturl})
       }
 
